@@ -1,5 +1,11 @@
 <?php
 require_once "../server/database.php";
+require_once "../server/models/Poll.php";
+require_once "../server/models/Vote.php";
+require_once "../server/functions.php";
+require_once "../server/controllers/PollController.php";
+require_once "../server/controllers/LayoutsController.php";
+
 /**
  * Created by JetBrains PhpStorm.
  * User: Tudor
@@ -7,36 +13,20 @@ require_once "../server/database.php";
  * Time: 11:16 PM
  * To change this template use File | Settings | File Templates.
  */
-$database = new Database();
 
-$database->query('SELECT * FROM vote_subjects');
-//$database->bind(':description', "Test Poll");
-
-//$database->execute();
-
-$row = $database->resultset();
+    $layouts = new LayoutsController();
+    $polls = new PollController();
 
 
+    $layouts->header(['title' => 'Voting System']);
+    $polls->all();
+
+    $vote = new Vote();
+
+    var_dump($vote->insert_vote([1, 3, $_SERVER["REMOTE_ADDR"]]));
+
+    $layouts->footer();
 ?>
 
-<!Doctype html>
-<html>
-<head>
-
-    <title>Voting System</title>
-<pre>
-
-    <?php print_r($row); ?>
-
-</pre>
-    <h1>Candidates</h1>
-    <?php foreach($row as $candidate): ?>
-
-        <p><?php echo $candidate["description"]; ?></p>
-
-    <?php endforeach; ?>
 
 
-</head>
-
-</html>

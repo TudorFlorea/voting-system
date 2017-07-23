@@ -10,7 +10,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-class Database extends PDO{
+abstract class Database extends PDO{
 
     private $host = DB_HOST;
     private $user = DB_USER;
@@ -42,7 +42,7 @@ class Database extends PDO{
         $this->stmt = $this->conn->prepare($query);
     }
 
-    public function bind($param, $value, $type = null) {
+    protected function bind($param, $value, $type = null) {
 
         if(is_null($type)) {
             switch(true) {
@@ -63,21 +63,81 @@ class Database extends PDO{
         $this->stmt->bindValue($param, $value, $type);
     }
 
-    public function execute() {
+    protected function execute() {
         return $this->stmt->execute();
     }
 
-    public function resultset() {
+    protected function fetch_object() {
         $this->execute();
-        return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->stmt->fetchAll(PDO::FETCH_CLASS);
     }
 
-    public function single() {
+
+    protected function single() {
         $this->execute();
-        return $this->stmt->fetch(PDO::FETCH_ASSOC);
+        return $this->stmt->fetch(PDO::FETCH_CLASS);
     }
 
-    public function rowcount() {
+    protected function rowcount() {
         return $this->stmt->rowCount();
+    }
+
+    protected function table_select($table) {
+        $this->query("SELECT * FROM " . $table);
+        return $this->fetch_object();
+    }
+
+    protected function select_by_id($table, $id) {
+        $this->query("SELECT * FROM " . $table . " WHERE id=" . $id);
+        return $this->fetch_object();
+    }
+
+    protected function select_by_column($table, $column, $value) {
+        $this->query("SELECT * FROM " . $table . " WHERE " . $column . "=" . $value);
+        return $this->fetch_object();
+    }
+
+    protected function select_by_columns($table, $columns) {
+        $query = 'SELECT * FROM ' . $table . ' WHERE ';
+        $coumns_count = count($columns);
+        $counter = 0;
+        foreach($columns as $column => $value) {
+            $counter++;
+            $counter == $coumns_count ? $query .= $column . '=' . $value : $query .= $column . '=' . $value . ' AND ';
+        }
+        $this->query($query);
+        return $this->fetch_object();
+    }
+
+    protected function select_by_column_join() {
+        $this->query("SELECT * FROM vote_subjects JOIN votes ON vote_subjects.id = votes.candidate_id");
+        return $this->fetch_object();
+    }
+
+    protected function insert($table, $columns, $values) {
+        $query = "INSERT INTO " . $table . " (";
+        $column_count = count($columns);
+        $column_counter = 0;
+        foreach($columns as $column) {
+            $column_counter++;
+            $column_count == $column_counter ? $query .= $column . ") VALUES (" : $query .= $column . ", ";
+        }
+
+        $values_count = count($values);
+        $values_counter = 0;
+
+        foreach ($columns as $column) {
+            $values_counter++;
+            $values_count == $values_counter ? $query .=  ":" . $column . ")" : $query .= ":" . $column . ", ";
+        }
+
+        $this->query($query);
+
+        for($i = 0; $i < count($columns); $i++) {
+           $this->bind(":" . $columns[$i], $values[$i]);
+        }
+
+        return $this->execute();
+
     }
 }
