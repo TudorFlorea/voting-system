@@ -1,14 +1,15 @@
 <?php
-
-    require_once("config.php");
-
 /**
- * Created by JetBrains PhpStorm.
+ * Created by PhpStorm.
  * User: Tudor
- * Date: 7/17/17
- * Time: 12:31 AM
- * To change this template use File | Settings | File Templates.
+ * Date: 21.10.2018
+ * Time: 19:40
  */
+
+namespace App\Core\Database\Database;
+
+use PDO;
+
 
 abstract class Database extends PDO{
 
@@ -134,7 +135,7 @@ abstract class Database extends PDO{
         $this->query($query);
 
         for($i = 0; $i < count($columns); $i++) {
-           $this->bind(":" . $columns[$i], $values[$i]);
+            $this->bind(":" . $columns[$i], $values[$i]);
         }
 
         return $this->execute();

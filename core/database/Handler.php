@@ -1,41 +1,23 @@
 <?php
-
-    require_once("config.php");
-
 /**
- * Created by JetBrains PhpStorm.
+ * Created by PhpStorm.
  * User: Tudor
- * Date: 7/17/17
- * Time: 12:31 AM
- * To change this template use File | Settings | File Templates.
+ * Date: 21.10.2018
+ * Time: 22:27
  */
 
-abstract class Database extends PDO{
+namespace App\Core\Database;
 
-    private $host = DB_HOST;
-    private $user = DB_USER;
-    private $pass = DB_PASS;
-    private $dbname = DB_NAME;
+use PDO;
 
+class Handler
+{
     private $conn;
-    private $error;
     private $stmt;
 
-    public function __construct() {
-        //set connection string
-        $connstr = 'mysql:host=' . $this->host . ';dbname=' . $this->dbname;
-        //set options
-        $options = [
-            PDO::ATTR_PERSISTENT    => true,
-            PDO::ATTR_ERRMODE       => PDO::ERRMODE_EXCEPTION
-        ];
-
-        //create pdo istance
-        try {
-            $this->conn = new PDO($connstr, $this->user, $this->pass, $options);
-        } catch (PDOException $e) {
-            var_dump($this->error = $e->getMessage());
-        }
+    function __construct($pdo)
+    {
+        $this->conn = $pdo;
     }
 
     public function query($query) {
@@ -69,25 +51,25 @@ abstract class Database extends PDO{
 
     protected function fetch_object() {
         $this->execute();
-        return $this->stmt->fetchAll(PDO::FETCH_CLASS);
+        return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
 
     protected function single() {
         $this->execute();
-        return $this->stmt->fetch(PDO::FETCH_CLASS);
+        return $this->stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     protected function rowcount() {
         return $this->stmt->rowCount();
     }
 
-    protected function table_select($table) {
+    public function table_select($table) {
         $this->query("SELECT * FROM " . $table);
         return $this->fetch_object();
     }
 
-    protected function select_by_id($table, $id) {
+    public function select_by_id($table, $id) {
         $this->query("SELECT * FROM " . $table . " WHERE id=" . $id);
         return $this->fetch_object();
     }
@@ -114,7 +96,7 @@ abstract class Database extends PDO{
         return $this->fetch_object();
     }
 
-    protected function insert($table, $columns, $values) {
+    public function insert($table, $columns, $values) {
         $query = "INSERT INTO " . $table . " (";
         $column_count = count($columns);
         $column_counter = 0;
@@ -134,10 +116,11 @@ abstract class Database extends PDO{
         $this->query($query);
 
         for($i = 0; $i < count($columns); $i++) {
-           $this->bind(":" . $columns[$i], $values[$i]);
+            $this->bind(":" . $columns[$i], $values[$i]);
         }
 
         return $this->execute();
 
     }
+
 }

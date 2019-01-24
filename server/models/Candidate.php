@@ -10,7 +10,7 @@
 require_once '/../Database.php';
 
 class Candidate extends Database{
-    private $table = 'vote_subjects';
+    private $table = 'candidates';
     private $poll_id = 'poll_id';
     private $candidate_id = 'candidate_id';
     private $votes_table = 'votes';
@@ -20,7 +20,7 @@ class Candidate extends Database{
     }
 
     public function all() {
-        return $this->table_select($$this->table);
+        return $this->table_select($this->table);
     }
 
     public function index($id) {
